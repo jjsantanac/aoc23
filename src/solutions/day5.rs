@@ -1,4 +1,4 @@
-use std::{collections::VecDeque, fs, io::Read};
+use std::collections::VecDeque;
 
 #[derive(Clone, Copy)]
 struct MappingDefinition {
@@ -13,13 +13,8 @@ struct Range {
     range: i64,
 }
 
-fn main() {
-    let mut content = String::new();
-    let _input = fs::File::open("inputs/input_day5.txt")
-        .unwrap()
-        .read_to_string(&mut content);
-
-    let mut split = content.split("\n\n");
+pub fn solve(input: &str) {
+    let mut split = input.split("\n\n");
 
     let seeds = split
         .next()

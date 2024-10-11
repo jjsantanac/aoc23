@@ -1,12 +1,5 @@
-use std::{fs, io::Read};
-
-fn main() {
-    let mut content = String::new();
-    let _input = fs::File::open("inputs/input_day1.txt")
-        .unwrap()
-        .read_to_string(&mut content);
-
-    let mut split = content.split("\n");
+pub fn solve(input: &str) {
+    let mut split = input.split("\n");
 
     let mut result: Vec<String> = vec![];
 
@@ -24,8 +17,6 @@ fn main() {
         let concat = a.clone() + &b;
 
         result.push(concat.clone());
-
-        println!("{}", concat)
     }
 
     let sum = result

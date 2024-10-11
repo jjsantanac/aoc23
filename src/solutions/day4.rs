@@ -1,12 +1,7 @@
-use std::{collections::HashMap, fs, io::Read};
+use std::collections::HashMap;
 
-fn main() {
-    let mut content = String::new();
-    let _ = fs::File::open("inputs/input_day4.txt")
-        .unwrap()
-        .read_to_string(&mut content);
-
-    let split = content.split("\n");
+pub fn solve(input: &str) {
+    let split = input.split("\n");
 
     let mut total_score = 0;
 

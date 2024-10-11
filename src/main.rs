@@ -1,3 +1,41 @@
+use clap::Parser;
+
+use crate::cli::Cli;
+use crate::parse::parse_input;
+use crate::solutions::*;
+
+mod cli;
+mod parse;
+mod solutions;
+
 fn main() {
-    println!("Hello, world!");
+    let args = Cli::parse();
+
+    let day = match args.day {
+        Some(day) => day,
+        None => panic!("No day provided."),
+    };
+
+    match day {
+        1 => {
+            day1::solve(&parse_input("inputs/input_day1.txt"));
+            day1b::solve(&parse_input("inputs/input_day1.txt"));
+        }
+        2 => {
+            day2::solve(&parse_input("inputs/input_day2.txt"));
+        }
+        3 => {
+            day3::solve(&parse_input("inputs/input_day3.txt"));
+        }
+        4 => {
+            day4::solve(&parse_input("inputs/input_day4.txt"));
+        }
+        5 => {
+            day5::solve(&parse_input("inputs/input_day5.txt"));
+        }
+        6 => {
+            day6::solve(&parse_input("inputs/input_day6.txt"));
+        }
+        _ => println!("Specified day not yet implemented"),
+    }
 }

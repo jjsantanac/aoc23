@@ -1,12 +1,5 @@
-use std::{fs, io::Read};
-
-fn main() {
-    let mut content = String::new();
-    let _input = fs::File::open("inputs/input_day2.txt")
-        .unwrap()
-        .read_to_string(&mut content);
-
-    let split = content.split("\n");
+pub fn solve(input: &str) {
+    let split = input.split("\n");
 
     let mut valid_games: Vec<i32> = vec![];
     let mut min_cubes_product: Vec<i32> = vec![];
@@ -16,8 +9,6 @@ fn main() {
             continue;
         }
         let sub_split = line.split(":").collect::<Vec<&str>>();
-
-        // println!("line:{}", line);
 
         let games = sub_split[1].replace(";", ",");
 

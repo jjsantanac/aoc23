@@ -1,18 +1,11 @@
-use std::{fs, io::Read};
-
 struct NeighbourWithDiags {
     left: Option<String>,
     center: Option<String>,
     right: Option<String>,
 }
 
-fn main() {
-    let mut content = String::new();
-    let _input = fs::File::open("inputs/input_day3.txt")
-        .unwrap()
-        .read_to_string(&mut content);
-
-    let split = content.split("\n");
+pub fn solve(input: &str) {
+    let split = input.split("\n");
 
     let mut matrix: Vec<Vec<char>> = vec![];
 
