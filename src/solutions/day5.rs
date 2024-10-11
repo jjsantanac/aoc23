@@ -1,16 +1,35 @@
 use std::collections::VecDeque;
 
 #[derive(Clone, Copy)]
-struct MappingDefinition {
+struct Mapping {
     target: i64,
     source: i64,
     range: i64,
+}
+impl Mapping {
+    fn get_mapping_offset(&self) -> i64 {
+        return self.source - self.target;
+    }
+
+    fn get_source_min(&self) -> i64 {
+        return self.source;
+    }
+
+    fn get_source_max(&self) -> i64 {
+        return self.source + self.range - 1;
+    }
 }
 
 #[derive(Clone, Copy)]
 struct Range {
     min: i64,
     range: i64,
+}
+
+impl Range {
+    fn max(&self) -> i64 {
+        return self.min + self.range - 1;
+    }
 }
 
 pub fn solve(input: &str) {
@@ -27,11 +46,11 @@ pub fn solve(input: &str) {
         .split(" ")
         .collect::<Vec<&str>>();
 
-    let mut mapping_matrix: Vec<Vec<MappingDefinition>> = vec![];
+    let mut mapping_matrix: Vec<Vec<Mapping>> = vec![];
 
     for mapping in split {
         let mapping_split: Vec<&str> = mapping.split("\n").collect();
-        let mut mappings: Vec<MappingDefinition> = vec![];
+        let mut mappings: Vec<Mapping> = vec![];
 
         for line in mapping_split {
             if line.len() == 0 {
@@ -46,7 +65,7 @@ pub fn solve(input: &str) {
                     .map(|value| value.parse::<i64>().unwrap())
                     .collect::<Vec<i64>>();
 
-                mappings.push(MappingDefinition {
+                mappings.push(Mapping {
                     target: mapping_definition[0],
                     source: mapping_definition[1],
                     range: mapping_definition[2],
@@ -56,75 +75,51 @@ pub fn solve(input: &str) {
         mapping_matrix.push(mappings)
     }
 
-    println!("len: {}", seeds.len());
+    let mut seed_locations: Vec<i64> = vec![];
 
-    // for chunk in seeds.chunks(2) {
-    //     println!("chunk1: {}", chunk[0]);
-    //     println!("chunk2: {}", chunk[1]);
-    //     let min = chunk[0].parse::<i64>().unwrap();
-    //     let max = min + chunk[1].parse::<i64>().unwrap() - 1;
+    for seed in seeds.iter().map(|s| s.parse::<i64>().unwrap()) {
+        map_seed_location(&seed, &mapping_matrix, &mut seed_locations)
+    }
 
-    //     let seed_range = min..max;
-
-    //     map_seed_location(
-    //         &seed_range.collect::<Vec<i64>>(),
-    //         &mapping_matrix,
-    //         &mut seed_locations,
-    //     );
-    // }
-    //
     let mut seed_range_locations: Vec<i64> = vec![];
-
-    let i = 0;
-
     for s in seeds.chunks(2) {
         let seedrange = Range {
             min: s.get(0).unwrap().parse::<i64>().unwrap(),
             range: s.get(1).unwrap().parse::<i64>().unwrap(),
         };
-        println!("seed min: {}", seedrange.min);
-        println!("seed max: {}", seedrange.min + seedrange.range - 1);
         map_seed_range_location(seedrange, &mapping_matrix, &mut seed_range_locations);
     }
 
     let min_loc = seed_range_locations.iter().min().unwrap();
-    println!("MIN LOC: {}", min_loc)
+
+    println!(
+        "(Part 1) MIN SEED: {}",
+        seed_locations.iter().min().unwrap()
+    );
+    println!("(Part 2) MIN LOC: {}", min_loc);
 }
 
 fn map_seed_location(
-    seeds: &Vec<i64>,
-    mapping_matrix: &Vec<Vec<MappingDefinition>>,
+    seed: &i64,
+    mapping_matrix: &Vec<Vec<Mapping>>,
     seed_locations: &mut Vec<i64>,
 ) {
-    for seed in seeds.iter() {
-        // println!("seed: {}", seed);
+    let mut mapped_value = seed.clone();
 
-        let mut mapped_value = seed.clone();
-
-        for x in mapping_matrix.iter() {
-            let mut matched = false;
-            for y in x.iter() {
-                if matched {
-                    break;
-                }
-
-                let map_max = y.source + y.range - 1;
-                let map_min = y.source;
-                let offset = y.source - y.target;
-
-                if mapped_value >= map_min && mapped_value <= map_max {
-                    matched = true;
-                    mapped_value = mapped_value - offset;
-                }
+    for x in mapping_matrix.iter() {
+        for y in x.iter() {
+            if mapped_value >= y.get_source_min() && mapped_value <= y.get_source_max() {
+                mapped_value = mapped_value - y.get_mapping_offset();
+                break;
             }
         }
-        seed_locations.push(mapped_value);
     }
+    seed_locations.push(mapped_value);
 }
 
 fn map_seed_range_location(
     seed_range: Range,
-    mapping_matrix: &Vec<Vec<MappingDefinition>>,
+    mapping_matrix: &Vec<Vec<Mapping>>,
     seed_range_locations: &mut Vec<i64>,
 ) {
     let mut mapped_ranges: Vec<Range> = vec![];
@@ -132,24 +127,18 @@ fn map_seed_range_location(
     let mut unmapped_ranges: VecDeque<Range> = VecDeque::new();
     unmapped_ranges.push_back(seed_range);
 
-    for (i, mappings) in mapping_matrix.iter().enumerate() {
+    for mappings in mapping_matrix.iter() {
         while let Some(u_r) = unmapped_ranges.pop_front() {
-            let unmapped_min = u_r.min;
-            let unmapped_max = unmapped_min + u_r.range - 1;
-            println!("current mapping level : {}", i);
-            println!("current unmapped min: {}", unmapped_min);
-            println!("current unmapped max: {}", unmapped_max);
+            let unmapped_min = &u_r.min;
+            let unmapped_max = u_r.max();
 
             for (j, bucket) in mappings.iter().enumerate() {
                 let bucket_min = bucket.source;
                 let bucket_max = bucket_min + bucket.range - 1;
-                println!("bucket min: {}", bucket_min);
-                println!("bucket max: {}", bucket_max);
+                // println!("bucket min: {}", bucket_min);
+                // println!("bucket max: {}", bucket_max);
 
-                if bucket_min <= unmapped_min
-                    && unmapped_min <= bucket_max
-                    && unmapped_max > bucket_max
-                {
+                if bucket_min <= u_r.min && u_r.min <= bucket_max && u_r.max() > bucket_max {
                     let diff = bucket_max - unmapped_min;
 
                     let unmapped_range = Range {
@@ -171,12 +160,12 @@ fn map_seed_range_location(
                     break;
                 } else if bucket_min <= unmapped_max
                     && unmapped_max <= bucket_max
-                    && unmapped_min < bucket_min
+                    && *unmapped_min < bucket_min
                 {
                     let diff = unmapped_max - bucket_min;
 
                     let unmapped_range = Range {
-                        min: unmapped_min,
+                        min: *unmapped_min,
                         range: u_r.range - diff - 1,
                     };
 
@@ -192,7 +181,7 @@ fn map_seed_range_location(
                     mapped_ranges.push(mapped_range);
 
                     break;
-                } else if bucket_min <= unmapped_min && bucket_max >= unmapped_min {
+                } else if bucket_min <= *unmapped_min && bucket_max >= *unmapped_min {
                     let offset = bucket.source - bucket.target;
 
                     let mapped_range = Range {
@@ -203,11 +192,11 @@ fn map_seed_range_location(
                     mapped_ranges.push(mapped_range);
 
                     break;
-                } else if unmapped_min < bucket_min && unmapped_max > bucket_max {
+                } else if *unmapped_min < bucket_min && unmapped_max > bucket_max {
                     let offset = bucket.source - bucket.target;
 
                     let unmapped_range_1 = Range {
-                        min: unmapped_min,
+                        min: *unmapped_min,
                         range: bucket_min - unmapped_min,
                     };
 
@@ -229,19 +218,11 @@ fn map_seed_range_location(
 
                     break;
                 } else {
-                    if unmapped_min == 78 && unmapped_max == 80 {}
-
                     if j == mappings.len() - 1 {
                         mapped_ranges.push(u_r);
-                        println!("reached end and no match")
                     }
                 }
             }
-
-            // if mapped_ranges.is_empty() {
-            //     println!("no match");
-            //     mapped_ranges.push(u_r)
-            // }
         }
 
         mapped_ranges
