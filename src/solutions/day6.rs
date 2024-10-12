@@ -1,5 +1,3 @@
-use std::i64;
-
 use regex::Regex;
 
 pub fn solve(input: &str) {
@@ -10,8 +8,8 @@ pub fn solve(input: &str) {
 
     let mut result: Vec<i64> = vec![];
 
-    for (time, distance) in race_times.iter().zip(record_distances.to_owned()) {
-        result.push(get_ways_to_win(time, &distance))
+    for (time, distance) in race_times.iter().zip(record_distances.iter()) {
+        result.push(get_ways_to_win(time, distance))
     }
 
     let ways_to_win = get_ways_to_win(&join_number(&race_times), &join_number(&record_distances));
