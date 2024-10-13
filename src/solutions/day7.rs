@@ -53,35 +53,44 @@ impl Display for HandType {
 }
 
 pub fn solve(input: &str) {
-    let mut camel_games = get_camel_games(&input);
+    let mut camel_games = get_camel_games(&input, false);
+    camel_games.sort_by(|a, b| camel_hand_comparator(a, b, false));
 
-    camel_games.sort_by(|a, b| camel_hand_comparator(a, b));
+    let mut camel_games_with_jokers = get_camel_games(&input, true);
+    camel_games_with_jokers.sort_by(|a, b| camel_hand_comparator(a, b, true));
 
     let mut result: Vec<i32> = vec![];
+    let mut result_with_jokers: Vec<i32> = vec![];
 
     for (i, line) in camel_games.iter().enumerate() {
-        println!("{}", line);
         result.push(line.bid.parse::<i32>().unwrap() * (i as i32 + 1))
     }
 
-    println!("RESULT: {}", result.iter().sum::<i32>())
+    for (i, line) in camel_games_with_jokers.iter().enumerate() {
+        result_with_jokers.push(line.bid.parse::<i32>().unwrap() * (i as i32 + 1))
+    }
+
+    println!("(Part 1) RESULT: {}", result.iter().sum::<i32>());
+    println!(
+        "(Part 2) RESULT: {}",
+        result_with_jokers.iter().sum::<i32>()
+    );
 }
 
-fn get_camel_games(input: &str) -> Vec<CamelHand> {
+fn get_camel_games(input: &str, with_jokers: bool) -> Vec<CamelHand> {
     return input
         .split("\n")
         .map(|l| l.split(" ").map(|s| s.trim()).collect::<Vec<&str>>())
         .filter(|l| l.len() == 2)
         .map(|l| CamelHand {
-            hand: determine_hand_type(l.get(0).unwrap()),
+            hand: determine_hand_type(l.get(0).unwrap(), with_jokers),
             bid: l.get(1).unwrap().to_string(),
             value: l.get(0).unwrap().to_string(),
         })
         .collect();
 }
 
-fn determine_hand_type(hand: &str) -> HandType {
-    // update with logic for joker
+fn determine_hand_type(hand: &str, with_jokers: bool) -> HandType {
     let mut occurences: HashMap<char, i32> = HashMap::new();
 
     for c in hand.chars() {
@@ -93,7 +102,21 @@ fn determine_hand_type(hand: &str) -> HandType {
         }
     }
 
-    let o = occurences.into_values().collect::<Vec<i32>>();
+    let mut o = occurences.values().cloned().collect::<Vec<i32>>();
+
+    if with_jokers {
+        if let Some(v) = occurences.get(&'J') {
+            if *v < 5 {
+                o.sort();
+                let i_joker = o.iter().position(|o| o == v).unwrap();
+                o.remove(i_joker);
+
+                let highest = o.last_mut().unwrap();
+
+                *highest += v;
+            }
+        }
+    }
 
     match o.len() {
         1 => return HandType::FiveOfAKind,
@@ -117,8 +140,7 @@ fn determine_hand_type(hand: &str) -> HandType {
     }
 }
 
-fn camel_hand_comparator(a: &CamelHand, b: &CamelHand) -> Ordering {
-    // update with logic for joker
+fn camel_hand_comparator(a: &CamelHand, b: &CamelHand, with_jokers: bool) -> Ordering {
     if a.type_to_digit() > b.type_to_digit() {
         return Ordering::Greater;
     } else if a.type_to_digit() < b.type_to_digit() {
@@ -128,33 +150,19 @@ fn camel_hand_comparator(a: &CamelHand, b: &CamelHand) -> Ordering {
             if a_c.eq(&b_c) {
                 continue;
             } else {
-                if a_c.is_numeric() && !b_c.is_numeric() {
-                    return Ordering::Less;
-                } else if !a_c.is_numeric() && b_c.is_numeric() {
-                    return Ordering::Greater;
-                } else if a_c.is_numeric() && b_c.is_numeric() {
-                    if a_c.to_digit(10).unwrap() > b_c.to_digit(10).unwrap() {
-                        return Ordering::Greater;
-                    } else {
-                        return Ordering::Less;
-                    }
-                } else {
-                    let card_labels = ["A", "K", "Q", "J", "T"];
+                let card_labels = match with_jokers {
+                    true => [
+                        'A', 'K', 'Q', 'T', '9', '8', '7', '6', '5', '4', '3', '2', 'J',
+                    ],
+                    false => [
+                        'A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2',
+                    ],
+                };
 
-                    let label_a = card_labels
-                        .iter()
-                        .position(|l| l.eq(&a_c.to_string()))
-                        .unwrap();
-                    let label_b = card_labels
-                        .iter()
-                        .position(|l| l.eq(&b_c.to_string()))
-                        .unwrap();
-                    if label_a > label_b {
-                        return Ordering::Less;
-                    } else {
-                        return Ordering::Greater;
-                    }
-                }
+                let label_a = card_labels.iter().position(|l| l.eq(&a_c)).unwrap();
+                let label_b = card_labels.iter().position(|l| l.eq(&b_c)).unwrap();
+
+                return label_b.cmp(&label_a);
             }
         }
         return Ordering::Equal;
