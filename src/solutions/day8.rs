@@ -1,15 +1,5 @@
 use std::collections::HashMap;
 
-// TODO
-// 1. parse nodes [X]
-// 2. create graph from nodes as a hashmap
-// 3. hashmap keys represent graph nodes
-// 4. hashmap values represent adjacent nodes -> left, right
-// 5. traverse graph by given directions -> iterate through graph nodes
-// 6. we start at AAA and want to reach ZZZ
-// 7. in case we deplete our given directions we just start over until the ZZZ is reached
-// 8. track number of steps as well
-//
 #[derive(Debug)]
 struct Graph {
     nodes: HashMap<String, Adjacency>,
@@ -60,7 +50,6 @@ pub fn solve(input: &str) {
     let mut graph = Graph::new();
 
     for node in nodes {
-        println!("node: {}", node);
         let node_split: Vec<&str> = node.split("=").collect();
 
         let current_node = node_split.get(0).unwrap().trim();
@@ -71,17 +60,31 @@ pub fn solve(input: &str) {
             &neighbours.get(0).unwrap().trim().replace("(", ""),
             &neighbours.get(1).unwrap().trim().replace(")", ""),
         );
-
-        match graph.get_adjacent(current_node) {
-            Some(x) => {
-                println!("node inserted: {:?}", x)
-            }
-            None => {}
-        }
     }
 
+    let steps = get_steps_to_end("AAA", &directions, &graph);
+
+    println!("(Part 1) Steps: {}", steps);
+
+    let mut starting_nodes: Vec<i64> = graph
+        .nodes
+        .keys()
+        .filter(|key| key.chars().last().unwrap().eq(&'A'))
+        .map(|node| get_steps_to_end(node, &directions, &graph))
+        .collect();
+
+    let mut lcm_current = starting_nodes.remove(0);
+
+    for node in starting_nodes.iter() {
+        lcm_current = lcm(&lcm_current, node);
+    }
+
+    println!("(Part 2) Steps: {}", lcm_current)
+}
+
+fn get_steps_to_end(start_node: &str, directions: &Vec<char>, graph: &Graph) -> i64 {
     let mut is_dest = false;
-    let mut current = "AAA";
+    let mut current = start_node;
 
     let mut steps: i64 = 0;
 
@@ -89,15 +92,15 @@ pub fn solve(input: &str) {
         for direction in directions.iter() {
             match graph.get_adjacent(current) {
                 Some(x) => {
-                    println!("Currently at: {}", current);
-                    println!("Going: {}", direction);
-                    if current.eq("ZZZ") {
+                    if current.chars().last().unwrap().eq(&'Z') {
                         is_dest = true;
                         break;
                     }
+
                     if direction.eq(&'L') {
                         current = &x.left;
                     };
+
                     if direction.eq(&'R') {
                         current = &x.right;
                     }
@@ -107,5 +110,17 @@ pub fn solve(input: &str) {
             }
         }
     }
-    println!("steps: {}", steps)
+    return steps;
+}
+
+fn gcd(a: &i64, b: &i64) -> i64 {
+    if b.eq(&0) {
+        return *a;
+    } else {
+        return gcd(b, &(a % b));
+    }
+}
+
+fn lcm(a: &i64, b: &i64) -> i64 {
+    return (a * b).abs() / gcd(a, b);
 }
