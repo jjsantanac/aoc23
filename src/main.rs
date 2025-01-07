@@ -42,6 +42,15 @@ fn main() {
         8 => {
             day8::solve(&parse_input("inputs/input_day8.txt"));
         }
+        9 => {
+            day9::solve(&parse_input("inputs/input_day9.txt"));
+        }
+        10 => {
+            day10::solve(&parse_input("inputs/input_day10.txt"));
+        }
+        11 => {
+            day11::solve(&parse_input("inputs/input_day11_test.txt"));
+        }
         _ => println!("Specified day not yet implemented"),
     }
 }
