@@ -1,8 +1,4 @@
-use core::panic;
-use std::{
-    char,
-    collections::{HashMap, VecDeque},
-};
+use std::char;
 
 use itertools::Itertools;
 
@@ -52,26 +48,6 @@ pub fn solve(input: &str) {
     println!("original cols expanded");
     println!("{}", matrix_to_string(&transpose(&matrix_t)));
 
-    // let final_expanded = &transpose(&matrix_t)
-    //     .clone()
-    //     .iter()
-    //     .map(|r| {
-    //         r.iter()
-    //             .map(|c| {
-    //                 if (*c).eq(&'#') {
-    //                     counter += 1;
-    //                     println!("counter: {}", counter);
-    //                     return char::from_digit(counter - 1, 10).unwrap();
-    //                     // return counter.to_string();
-    //                 } else {
-    //                     return *c;
-    //                     // return String::from(*c);
-    //                 }
-    //             })
-    //             .collect::<Vec<char>>()
-    //     })
-    //     .collect::<Vec<Vec<char>>>();
-
     let final_expanded = &transpose(&matrix_t);
 
     println!("result");
@@ -99,170 +75,13 @@ pub fn solve(input: &str) {
 
     let mut distances: Vec<usize> = vec![];
 
-    for (n, ((start_row, start_col), (target_row, target_col))) in
-        galaxies_pairs.iter().map(|p| (p[0], p[1])).enumerate()
+    for ((start_row, start_col), (target_row, target_col)) in
+        galaxies_pairs.iter().map(|p| (p[0], p[1]))
     {
-        println!("start ({},{})", start_row, start_col);
-        println!("target ({},{})", target_row, target_col);
         let distance = target_row.abs_diff(*start_row) + target_col.abs_diff(*start_col);
         distances.push(distance);
-        println!("distance: {}", distance);
-        // println!("pair no {}", n);
-
-        // let pos = (*start_row, *start_col);
-
-        // let mut q: VecDeque<(usize, usize)> = VecDeque::new();
-        // q.push_back(pos);
-        // let mut visited: Vec<(usize, usize)> = vec![];
-        // let mut distances: HashMap<(usize, usize), i32> = HashMap::from([(pos, 0)]);
-
-        // while let Some(current) = q.pop_front() {
-        //     let (i_row, i_col) = current;
-
-        //     let col_max = final_expanded.first().unwrap().len() - 1;
-        //     let row_max = final_expanded.len() - 1;
-
-        //     // println!("current {:?}", current);
-
-        //     if i_row.eq(target_row) && i_col.eq(target_col) {
-        //         println!("start: {:?}", pos);
-        //         println!("target: {:?}", (target_row, target_col));
-        //         println!("distance: {}", distances.get(&current).unwrap());
-        //         break;
-        //     }
-
-        //     let current_distance = match distances.get_mut(&current) {
-        //         Some(x) => *x,
-        //         None => 0,
-        //     };
-
-        //     // top
-        //     if i_col > 0 {
-        //         let top = (i_row, i_col - 1);
-        //         if !visited.contains(&top) {
-        //             distances.insert(top, current_distance + 1);
-        //             visited.push(top);
-        //             q.push_back(top);
-        //         }
-        //     }
-
-        //     // bottom
-        //     if i_col < col_max {
-        //         let bottom = (i_row, i_col + 1);
-        //         if !visited.contains(&bottom) {
-        //             distances.insert(bottom, current_distance + 1);
-        //             visited.push(bottom);
-        //             q.push_back(bottom);
-        //         }
-        //     }
-
-        //     // left
-        //     if i_row > 0 {
-        //         let left = (i_row - 1, i_col);
-        //         if !visited.contains(&left) {
-        //             distances.insert(left, current_distance + 1);
-        //             visited.push(left);
-        //             q.push_back(left);
-        //         }
-        //     }
-
-        //     // right
-        //     if i_row < row_max {
-        //         let right = (i_row + 1, i_col);
-        //         if !visited.contains(&right) {
-        //             distances.insert(right, current_distance + 1);
-        //             visited.push(right);
-        //             q.push_back(right);
-        //         }
-        //     }
-        // }
     }
 
-    //  for (start, target) in pairs.map(|p| (p[0], p[1])) {
-    // let mut pos: (usize, usize) = (usize::MAX, usize::MAX);
-    // for (i, row) in final_expanded.iter().enumerate() {
-    //     //match row.iter().position(|c| c.eq(&'8')) {
-    //     match row
-    //         .iter()
-    //         .position(|c| c.eq(&char::from_digit(start, 10).unwrap()))
-    //     {
-    //         Some(x) => {
-    //             pos = (i, x);
-    //             break;
-    //         }
-    //         None => continue,
-    //     };
-    // }
-
-    // // println!("pos {:?}", pos);
-
-    // let mut q: VecDeque<(usize, usize)> = VecDeque::new();
-    // q.push_back(pos);
-    // let mut visited: Vec<(usize, usize)> = vec![];
-    // let mut distances: HashMap<(usize, usize), i32> = HashMap::from([(pos, 0)]);
-
-    // while let Some(current) = q.pop_front() {
-    //     let (i_row, i_col) = current;
-
-    //     let col_max = final_expanded.first().unwrap().len() - 1;
-    //     let row_max = final_expanded.len() - 1;
-
-    //     // println!("current {:?}", current);
-
-    //     // if final_expanded[i_row][i_col].eq(&'2') {
-    //     if final_expanded[i_row][i_col].eq(&char::from_digit(target, 10).unwrap()) {
-    //         println!("start: {:?}", start);
-    //         println!("target: {:?}", target);
-    //         println!("distance: {}", distances.get(&current).unwrap());
-    //         break;
-    //     }
-
-    //     let current_distance = match distances.get_mut(&current) {
-    //         Some(x) => *x,
-    //         None => 0,
-    //     };
-
-    //     // top
-    //     if i_col > 0 {
-    //         let top = (i_row, i_col - 1);
-    //         if !visited.contains(&top) {
-    //             distances.insert(top, current_distance + 1);
-    //             visited.push(top);
-    //             q.push_back(top);
-    //         }
-    //     }
-
-    //     // bottom
-    //     if i_col < col_max {
-    //         let bottom = (i_row, i_col + 1);
-    //         if !visited.contains(&bottom) {
-    //             distances.insert(bottom, current_distance + 1);
-    //             visited.push(bottom);
-    //             q.push_back(bottom);
-    //         }
-    //     }
-
-    //     // left
-    //     if i_row > 0 {
-    //         let left = (i_row - 1, i_col);
-    //         if !visited.contains(&left) {
-    //             distances.insert(left, current_distance + 1);
-    //             visited.push(left);
-    //             q.push_back(left);
-    //         }
-    //     }
-
-    //     // right
-    //     if i_row < row_max {
-    //         let right = (i_row + 1, i_col);
-    //         if !visited.contains(&right) {
-    //             distances.insert(right, current_distance + 1);
-    //             visited.push(right);
-    //             q.push_back(right);
-    //         }
-    //     }
-    // }
-    //}
     println!("result {}", distances.iter().sum::<usize>());
 }
 
