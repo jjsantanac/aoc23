@@ -1,3 +1,4 @@
+use crate::grid_utils::transpose;
 use std::char;
 
 use itertools::Itertools;
@@ -91,18 +92,6 @@ fn matrix_to_string(matrix: &Vec<Vec<char>>) -> String {
         .map(|v| v.iter().collect::<String>())
         .collect::<Vec<String>>()
         .join("\n");
-}
-
-fn transpose(matrix: &Vec<Vec<char>>) -> Vec<Vec<char>> {
-    return (0..matrix.first().unwrap().len())
-        .into_iter()
-        .map(|j| {
-            (0..matrix.len())
-                .into_iter()
-                .map(move |i| matrix[i][j])
-                .collect::<Vec<char>>()
-        })
-        .collect();
 }
 
 fn get_empty_rows(matrix: &Vec<Vec<char>>) -> Vec<usize> {

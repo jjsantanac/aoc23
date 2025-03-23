@@ -5,6 +5,7 @@ use crate::parse::parse_input;
 use crate::solutions::*;
 
 mod cli;
+mod grid_utils;
 mod parse;
 mod solutions;
 
@@ -53,6 +54,9 @@ fn main() {
         }
         12 => {
             day12::solve(&parse_input("inputs/input_day12.txt"));
+        }
+        13 => {
+            day13::solve(&parse_input("inputs/input_day13.txt"));
         }
         _ => println!("Specified day not yet implemented"),
     }
