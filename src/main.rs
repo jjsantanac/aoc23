@@ -12,10 +12,8 @@ mod solutions;
 fn main() {
     let args = Cli::parse();
 
-    let day = match args.day {
-        Some(day) => day,
-        None => panic!("No day provided."),
-    };
+    // default to last day
+    let day = args.day.unwrap_or(14);
 
     match day {
         1 => {
@@ -57,6 +55,9 @@ fn main() {
         }
         13 => {
             day13::solve(&parse_input("inputs/input_day13.txt"));
+        }
+        14 => {
+            day14::solve(&parse_input("inputs/input_day14.txt"));
         }
         _ => println!("Specified day not yet implemented"),
     }
